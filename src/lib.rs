@@ -5,9 +5,9 @@ pub use nalgebra::{self, DMatrix, DVector, SVD};
 #[derive(Clone)]
 pub enum Basis {
     PolyHarmonic(i32),
-    Gaussian(f64),
-    MultiQuadric(f64),
-    InverseMultiQuadric(f64),
+    Gaussian(f32),
+    MultiQuadric(f32),
+    InverseMultiQuadric(f32),
 }
 
 #[derive(Clone)]
@@ -16,14 +16,14 @@ pub struct Scatter {
     basis: Basis,
     // TODO(explore): use matrix & slicing instead (fewer allocs).
     // An array of n vectors each of size m.
-    centers: Vec<DVector<f64>>,
+    centers: Vec<DVector<f32>>,
     // An m x n' matrix, where n' is the number of basis functions (including polynomial),
     // and m is the number of coords.
-    deltas: DMatrix<f64>,
+    deltas: DMatrix<f32>,
 }
 
 impl Basis {
-    fn eval(&self, r: f64) -> f64 {
+    fn eval(&self, r: f32) -> f32 {
         match self {
             Basis::PolyHarmonic(n) if n % 2 == 0 => {
                 // Somewhat arbitrary but don't expect tiny nonzero values.
@@ -44,7 +44,7 @@ impl Basis {
 }
 
 impl Scatter {
-    pub fn eval(&self, coords: DVector<f64>) -> DVector<f64> {
+    pub fn eval(&self, coords: DVector<f32>) -> DVector<f32> {
         let n = self.centers.len();
         let basis = DVector::from_fn(self.deltas.ncols(), |row, _c| {
             if row < n {
@@ -65,8 +65,8 @@ impl Scatter {
     // This usage is consistent with Wilna du Toit's masters thesis "Radial Basis
     // Function Interpolation"
     pub fn create(
-        centers: Vec<DVector<f64>>,
-        vals: Vec<DVector<f64>>,
+        centers: Vec<DVector<f32>>,
+        vals: Vec<DVector<f32>>,
         basis: Basis,
         order: usize,
     ) -> Scatter {
@@ -91,9 +91,9 @@ impl Scatter {
         // coefficients.
         let means: Vec<_> = if order == 2 {
             let n = centers.len();
-            let n_recip = (n as f64).recip();
+            let n_recip = (n as f32).recip();
             (0..centers[0].len())
-                .map(|i| centers.iter().map(|c| c[i]).sum::<f64>() * n_recip)
+                .map(|i| centers.iter().map(|c| c[i]).sum::<f32>() * n_recip)
                 .collect()
         } else {
             Vec::new()
@@ -127,7 +127,7 @@ impl Scatter {
         if order == 2 {
             let m = centers[0].len();
             for i in 0..deltas.nrows() {
-                let offset: f64 = (0..m).map(|j| means[j] * deltas[(i, n + 1 + j)]).sum();
+                let offset: f32 = (0..m).map(|j| means[j] * deltas[(i, n + 1 + j)]).sum();
                 deltas[(i, n)] -= offset;
             }
         }
