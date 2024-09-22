@@ -12,3 +12,4 @@ description = "An implementation of Radial Basis Function multidimensional inter
 
 [dependencies]
 nalgebra = "0.18"
+nalgebra-sparse = "0.10.0"
