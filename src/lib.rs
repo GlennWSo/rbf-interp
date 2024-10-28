@@ -49,6 +49,7 @@ non-smooth, and too large one will result in system with ill-conditioned matrix.
 Gaussian(f32),
 **/
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ThinPlateSpline;
 impl BasisFunction for ThinPlateSpline {
     fn eval(v: f32) -> f32 {
@@ -60,6 +61,7 @@ impl BasisFunction for ThinPlateSpline {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Gaussian<const R1000: u32>;
 impl<const R1000: u32> BasisFunction for Gaussian<R1000> {
     const R: f32 = R1000 as f32 / 1000_f32;
