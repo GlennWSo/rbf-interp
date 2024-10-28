@@ -1,10 +1,12 @@
 //! A library for multidimensional interpolation.
 
 #![allow(unused)]
-
 use std::fmt::Debug;
 use std::{marker::PhantomData, ops::Neg, time::Instant};
 
+
+
+use serde::{Deserialize, Serialize};
 pub use nalgebra as na;
 use nalgebra::{DMatrix, DMatrixSlice, DVector, Dynamic, SliceStorage, SVD, U1};
 
@@ -78,7 +80,7 @@ pub type Row3 = na::RowVector3<f32>;
 pub type Row2 = na::RowVector2<f32>;
 pub type XY = na::Matrix1x2<f32>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Scatter<B: BasisFunction> {
     phantom_basis: PhantomData<B>,
     data: Vec3,
