@@ -4,8 +4,6 @@
 use std::fmt::Debug;
 use std::{marker::PhantomData, ops::Neg, time::Instant};
 
-
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -82,7 +80,7 @@ pub type Row3 = na::RowVector3<f32>;
 pub type Row2 = na::RowVector2<f32>;
 pub type XY = na::Matrix1x2<f32>;
 
-#[derive(Clone, Debug )]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Scatter<B: BasisFunction> {
     phantom_basis: PhantomData<B>,
@@ -92,9 +90,8 @@ pub struct Scatter<B: BasisFunction> {
 type Column =
     nalgebra::Matrix<f32, Dynamic, U1, SliceStorage<'static, f32, Dynamic, U1, U1, Dynamic>>;
 
-impl<B: BasisFunction> Scatter<B> {    
+impl<B: BasisFunction> Scatter<B> {
     pub fn eval(&self, coord: XY) -> f32 {
-
         let centers = self.data.columns_range(..2);
         let basis = DVector::from_fn(self.data.nrows(), |row, _c| {
             let center = centers.row(row);
@@ -104,7 +101,7 @@ impl<B: BasisFunction> Scatter<B> {
             // linear component
         });
         let deltas = self.data.column(2);
-        
+
         basis.dot(&deltas)
     }
 
@@ -129,7 +126,6 @@ impl<B: BasisFunction> Scatter<B> {
         let vals = data.column(2);
         let deltas = svd.solve(&vals, eps).unwrap();
         data.set_column(2, &deltas);
-        
 
         Scatter {
             phantom_basis: PhantomData,
