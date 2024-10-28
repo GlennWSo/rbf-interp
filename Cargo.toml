@@ -10,6 +10,11 @@ repository = "https://github.com/linebender/rbf-interp"
 readme = "README.md"
 description = "An implementation of Radial Basis Function multidimensional interpolation"
 
+
+[features]
+serde = ["dep:serde", "nalgebra/serde", "nalgebra/serde-serialize", "nalgebra/serde_derive"]
+
 [dependencies]
-nalgebra = "0.18"
+nalgebra = { version = "0.18" }
 nalgebra-sparse = "0.10.0"
+serde = { version = "1.0.213", features = ["derive"], optional = true}
