@@ -9,6 +9,10 @@ categories = ["science"]
 repository = "https://github.com/GlennWSo/rbf-interp"
 readme = "README.md"
 description = "An implementation of Radial Basis Function multidimensional interpolation"
+exclude = [
+    ".envrc",
+    ".helix/*",
+]
 
 
 [features]
@@ -18,3 +22,4 @@ serde = ["dep:serde", "nalgebra/serde", "nalgebra/serde-serialize", "nalgebra/se
 nalgebra = { version = "0.18" }
 nalgebra-sparse = "0.10.0"
 serde = { version = "1.0.213", features = ["derive"], optional = true}
+
