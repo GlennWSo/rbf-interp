@@ -1,6 +1,6 @@
 [package]
 name = "rbf3"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Glenn Winbo Sondell glennpub@pm.me", "Raph Levien <raph.levien@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2018"

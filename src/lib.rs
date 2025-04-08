@@ -4,7 +4,7 @@
 use std::fmt::Debug;
 use std::{marker::PhantomData, ops::Neg, time::Instant};
 
-use nalgebra_sparse::na::UnitVector3;
+// use nalgebra_sparse::na::{Point3, UnitVector3};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -119,15 +119,10 @@ impl<B: BasisFunction> HMapScatter<B> {
         }
     }
     pub fn evals(&self, input: &mut [[f32; 3]]) {
-        let invquat = self.quat.inverse();
-        for coord in input.iter_mut() {
-            let point = Point3::from(*coord);
-            let mut point = self.quat.transform_point(&point);
-            point.z = self.scatter.eval(&[point.x, point.y]);
-            let point = invquat.transform_point(&point);
-            coord[0] = point.x;
-            coord[1] = point.y;
-            coord[2] = point.z;
+        let mut points: Points = input.iter().map(|v| (*v).into()).collect();
+        self.eval_points(&mut points);
+        for (output, point) in input.iter_mut().zip(points.iter()) {
+            *output = [point.x, point.y, point.z];
         }
     }
 }
