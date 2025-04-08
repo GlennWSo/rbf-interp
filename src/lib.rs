@@ -110,26 +110,24 @@ impl<B: BasisFunction> HMapScatter<B> {
         // let coords = Vec2::from(centers);
         Self::create(h_axis, points)
     }
+    pub fn eval_points(&self, points: &mut [Point3<f32>]) {
+        let invquat = self.quat.inverse();
+        for point in points {
+            let mut local = self.quat.transform_point(point);
+            local.z = self.scatter.eval(&[local.x, local.y]);
+            *point = invquat.transform_point(&local);
+        }
+    }
     pub fn evals(&self, input: &mut [[f32; 3]]) {
         let invquat = self.quat.inverse();
-        // let coords: Vec<Point3<f32>> = input
-        //     .iter()
-        //     .map(|v| {
-        //         let point = Point3::from(*v);
-        //         self.quat.transform_point(&point)
-        //     })
-        //     .collect();
-
         for coord in input.iter_mut() {
             let point = Point3::from(*coord);
-            let point = self.quat.transform_point(&point);
-            let val = self.scatter.eval(&[point.x, point.y]);
-            let dh = val - point.z;
-            let axis: &Vector3<f32> = &self.axis;
-            let delta_v = axis * dh;
-            coord[0] += delta_v.x;
-            coord[1] += delta_v.y;
-            coord[2] += delta_v.z;
+            let mut point = self.quat.transform_point(&point);
+            point.z = self.scatter.eval(&[point.x, point.y]);
+            let point = invquat.transform_point(&point);
+            coord[0] = point.x;
+            coord[1] = point.y;
+            coord[2] = point.z;
         }
     }
 }
@@ -216,6 +214,42 @@ mod tests {
     }
 
     #[test]
+    fn test_hmap_points() {
+        let coords: Vec<_> = {
+            let (coords, vals) = sinplane();
+            coords
+                .into_iter()
+                .zip(vals.into_iter())
+                .map(|(c, v)| [c[0], c[1], v])
+                .collect()
+        };
+
+        let mut points: Points = coords.iter().map(|v| (*v).into()).collect();
+        let input = points.clone();
+        let normal = Vector3::new(0.0, 0.5, 1.0);
+        let hmap =
+            HMapScatter::<ThinPlateSpline>::create(Unit::new_normalize(normal), points.clone());
+
+        // offset along axis
+        for point in points.iter_mut() {
+            point.x += hmap.axis.x * 3.0;
+            point.y += hmap.axis.y * 3.0;
+            point.z += hmap.axis.z * 3.0;
+        }
+
+        hmap.eval_points(&mut points);
+
+        for (input, output) in input.iter().zip(points) {
+            let diff = input - output;
+            println!("diff: {}, {}, {}", diff.x, diff.y, diff.z);
+            let tol = 0.001;
+            let adiff = diff.norm();
+            assert!(adiff < tol);
+        }
+
+        // let mut out = coords.clone();
+    }
+    #[test]
     fn test_hmap() {
         let coords: Vec<_> = {
             let (coords, vals) = sinplane();
@@ -225,15 +259,25 @@ mod tests {
                 .map(|(c, v)| [c[0], c[1], v])
                 .collect()
         };
-        let hmap = HMapScatter::<ThinPlateSpline>::new([0.0, 0.5, 1.0], &coords);
+
+        let points: Points = coords.iter().map(|v| (*v).into()).collect();
+        let normal = Vector3::new(0.0, 0.5, 1.0);
+        let hmap = HMapScatter::<ThinPlateSpline>::create(Unit::new_normalize(normal), points);
+
+        // let hmap = HMapScatter::<ThinPlateSpline>::new([0.0, 0.5, 1.0], &coords);
         let mut out = coords.clone();
         hmap.evals(&mut out);
         for (input, output) in coords.iter().zip(out) {
             println!("inout: {input:?}, {output:?}");
+            let tol = 0.001;
+            let adiff = (input[0] - output[0]).abs();
+            assert!(adiff < tol);
+            let adiff = (input[1] - output[1]).abs();
+            assert!(adiff < tol);
             let adiff = (input[2] - output[2]).abs();
-            assert!(adiff < 0.001);
+            assert!(adiff < tol);
         }
-        panic!();
+        dbg!(hmap.axis);
     }
 
     #[test]
