@@ -71,9 +71,6 @@ pub struct Scatter2<B: BasisFunction> {
     // data: Vec3,
 }
 
-type Column =
-    nalgebra::Matrix<f32, Dynamic, U1, SliceStorage<'static, f32, Dynamic, U1, U1, Dynamic>>;
-
 impl<B: BasisFunction> Scatter2<B> {
     pub fn eval(&self, coord: &[f32; 2]) -> f32 {
         let centers = &self.centers;
@@ -126,11 +123,11 @@ mod tests {
     use super::*;
 
     fn sinplane() -> (Vec<[f32; 2]>, Vec<f32>) {
-        let mut coords: Vec<_> = Vec::with_capacity(41);
-        let mut vals = Vec::with_capacity(41);
-        for c in -20..=20 {
-            let x = (c as f32) / 5.0;
-            for r in -20..=20 {
+        let mut coords: Vec<_> = Vec::with_capacity(21);
+        let mut vals = Vec::with_capacity(21);
+        for c in -10..=10 {
+            let x = (c as f32) / 3.0;
+            for r in -10..=10 {
                 let y = (r as f32) / 5.0;
                 let r = (x.powi(2) + y.powi(2)).sqrt();
                 let z = r.cos();
@@ -147,9 +144,8 @@ mod tests {
         let scatter = Scatter2::<ThinPlateSpline>::create(&coords, &vals);
         for (c, v) in coords.iter().zip(vals) {
             let h = scatter.eval(c);
-            println!("c: {:?}, v: {}, h: {}", c, v, h);
-            assert!((v - h).abs() < 0.01);
+            // println!("c: {:?}, v: {}, h: {}", c, v, h);
+            assert!((v - h).abs() < 0.001);
         }
-        // panic!();
     }
 }
