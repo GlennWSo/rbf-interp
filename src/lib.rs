@@ -119,7 +119,7 @@ impl<B: BasisFunction> HMapScatter<B> {
         }
     }
     /// eval points distance to rbf surface along rbf local Z coord
-    pub fn eval_diff(&self, point: Point3<f32>) {
+    pub fn eval_diff(&self, point: Point3<f32>) -> f32 {
         let local = self.quat.transform_point(&point);
         let rbf_z = self.scatter.eval(&[local.x, local.y]);
         local.z - rbf_z
